@@ -1,28 +1,26 @@
 # Multi-stage build for optimized production image
-FROM node:18-alpine AS base
+FROM oven/bun:1-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lock* ./
+COPY package.json bun.lockb ./
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN bun install --frozen-lockfile --production
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
-COPY package.json bun.lock* ./
-RUN npm ci
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
-COPY --from=deps /app/node_modules ./node_modules
 
 # Build the application
-RUN npm run build
+RUN bun run build
 
 # Production stage
 FROM base AS runner
@@ -57,7 +55,7 @@ ENV NODE_ENV=production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:1337/_health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD bun -e "require('http').get('http://localhost:1337/_health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["bun", "start"]
