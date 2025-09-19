@@ -1,21 +1,24 @@
-FROM node:20-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-# Install build tools for native dependencies
+# Install build tools for native dependencies (still needed for some packages)
 RUN apk add --no-cache python3 make g++
 
-# Copy everything
-COPY . .
+# Copy package files first for better caching
+COPY package.json ./
 
 # Install dependencies
-RUN npm install
+RUN bun install
+
+# Copy everything else
+COPY . .
 
 # Build the application
-RUN npm run build
+RUN bun run build
 
 # Expose port
 EXPOSE 1337
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["bun", "start"]
