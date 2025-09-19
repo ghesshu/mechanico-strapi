@@ -21,7 +21,7 @@ services:
   strapi:
     build: .
     ports:
-      - "5982:1337"
+      - "5982:5982"
     volumes:
       - ./public/uploads:/app/public/uploads
     env_file:
