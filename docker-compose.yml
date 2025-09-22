@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5192:5432"
+      - "5432"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d mechanico_strapi"]
@@ -21,7 +21,7 @@ services:
   strapi:
     build: .
     ports:
-      - "1337:1337"
+      - "1337"
     volumes:
       - ./public/uploads:/app/public/uploads
     env_file:
